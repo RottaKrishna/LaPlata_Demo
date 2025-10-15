@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:profile/styles.dart';
 import 'package:profile/help_support.dart';
 import 'package:profile/contact_admin.dart';
+import 'package:profile/terms_privacy.dart';
+import 'package:profile/download_activity_logs.dart';
 
 class ProfileSettingsScreen extends StatefulWidget {
   const ProfileSettingsScreen({super.key});
@@ -132,11 +134,23 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                   // ).showSnackBar(const SnackBar(content: Text('Data synced')));
                 },
               ),
-              _arrowRow('Download Logs/Reports', Icons.download, onTap: () {}),
+              _arrowRow(
+                'Download Logs/Reports',
+                Icons.download,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const DownloadActivityLogsScreen()),
+                  );
+                },
+              ),
               _arrowRow(
                 'Terms & Privacy Policy',
                 Icons.privacy_tip,
-                onTap: () {},
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const TermsPrivacyScreen()),
+                  );
+                },
               ),
               _arrowRow(
                 'Help & Support',

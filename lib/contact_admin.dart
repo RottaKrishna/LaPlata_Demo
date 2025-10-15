@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:profile/styles.dart';
+import 'package:profile/help_support.dart';
 
 class ContactAdminScreen extends StatefulWidget {
   const ContactAdminScreen({super.key});
@@ -87,7 +88,9 @@ class _ContactAdminScreenState extends State<ContactAdminScreen> {
             ),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const HelpSupportScreen()),
+            ),
             child: Text(
               'View FAQs',
               style: GoogleFonts.poppins(color: AppColors.darkblue, fontWeight: FontWeight.w600),
@@ -122,8 +125,6 @@ class _ContactAdminScreenState extends State<ContactAdminScreen> {
             _multilineDescription(),
             const SizedBox(height: 10),
             _attachButton(),
-            const SizedBox(height: 10),
-            _diagnosticInfoBox(),
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
@@ -153,28 +154,70 @@ class _ContactAdminScreenState extends State<ContactAdminScreen> {
       'Feature Request',
       'Other',
     ];
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey[300]!),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _problemType,
-          isExpanded: true,
-          icon: const Icon(Icons.keyboard_arrow_down_rounded),
-          items: items
-              .map((e) => DropdownMenuItem<String>(
-                    value: e,
-                    child: Text(e, style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
-                  ))
-              .toList(),
-          onChanged: (v) => setState(() => _problemType = v ?? _problemType),
-        ),
-      ),
+
+    return Builder(
+      builder: (ctx) {
+        return InkWell(
+          onTap: () => _showProblemMenu(ctx, items),
+          borderRadius: BorderRadius.circular(10),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.grey[300]!),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _problemType,
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w500, color: Colors.black),
+                  ),
+                ),
+                const Icon(Icons.keyboard_arrow_down_rounded),
+              ],
+            ),
+          ),
+        );
+      },
     );
+  }
+
+  Future<void> _showProblemMenu(BuildContext context, List<String> items) async {
+    final renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+    final fieldOffset = renderBox.localToGlobal(Offset.zero);
+    final fieldSize = renderBox.size;
+    final screenSize = MediaQuery.of(context).size;
+
+    final selected = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        fieldOffset.dx,
+        fieldOffset.dy + fieldSize.height,
+        screenSize.width - (fieldOffset.dx + fieldSize.width),
+        screenSize.height - (fieldOffset.dy + fieldSize.height),
+      ),
+      color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      constraints: BoxConstraints(
+        minWidth: fieldSize.width,
+        maxWidth: fieldSize.width,
+        maxHeight: 260,
+      ),
+      elevation: 6,
+      items: items
+          .map((e) => PopupMenuItem<String>(
+                value: e,
+                child: Text(e, style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
+              ))
+          .toList(),
+    );
+
+    if (selected != null && selected != _problemType) {
+      setState(() => _problemType = selected);
+    }
   }
 
   Widget _multilineDescription() {
@@ -220,30 +263,7 @@ class _ContactAdminScreenState extends State<ContactAdminScreen> {
     );
   }
 
-  Widget _diagnosticInfoBox() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey[300]!),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(Icons.info_outline, color: Colors.grey),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              'Diagnostic Info (App Version, User ID, Device Model) will be automatically attached.',
-              style: GoogleFonts.poppins(color: Colors.grey[700], fontSize: 12.5),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  
 
   // Section: For Urgent Issues
   Widget _urgentContacts(BuildContext context) {
@@ -256,15 +276,15 @@ class _ContactAdminScreenState extends State<ContactAdminScreen> {
           children: [
             Expanded(child: _contactCard(
               icon: Icons.call,
-              title: 'Call Support',
+              title: '',
               subtitle: '555-123-4567',
-              caption: 'Available Mon-Fri, 8 AM - 5 PM',
+              caption: '',
               onTap: () {},
             )),
             const SizedBox(width: 12),
             Expanded(child: _contactCard(
               icon: Icons.email_outlined,
-              title: 'Email Support',
+              title: '',
               subtitle: 'support@laplatacity.gov',
               caption: '',
               onTap: () {},
@@ -289,35 +309,37 @@ class _ContactAdminScreenState extends State<ContactAdminScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey[300]!),
         ),
         padding: const EdgeInsets.all(14),
-        child: Row(
+        height: 140,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
-              width: 40,
-              height: 40,
+              width: 50,
+              height: 50,
               decoration: BoxDecoration(
                 color: AppColors.extralightblue,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(icon, color: AppColors.darkblue),
+              child: Icon(icon, color: AppColors.darkblue, size: 26),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 2),
-                  Text(subtitle, style: GoogleFonts.poppins(color: AppColors.darkblue, fontWeight: FontWeight.w600)),
-                  if (caption.isNotEmpty) ...[
-                    const SizedBox(height: 2),
-                    Text(caption, style: GoogleFonts.poppins(color: Colors.grey[700], fontSize: 12)),
-                  ]
-                ],
-              ),
+            const SizedBox(height: 10),
+            if (title.isNotEmpty) ...[
+              Text(title, style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 4),
+            ],
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(color: AppColors.darkblue, fontWeight: FontWeight.w600),
             ),
-            const Icon(Icons.arrow_forward_ios, size: 14),
+            if (caption.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(caption, style: GoogleFonts.poppins(color: Colors.grey[700], fontSize: 12), textAlign: TextAlign.center),
+            ]
           ],
         ),
       ),
